@@ -11,7 +11,8 @@ type Node[T comparable] struct {
 }
 
 type LinkedList[T comparable] interface {
-	Insert(idx int, value T)
+	Insert(idx int, value T) error // completed
+	Shift(value T)                 //completed
 	Remove(value T)
 	Push(T)                        //completed
 	Pop() (value T, err error)     // completed
@@ -21,12 +22,43 @@ type LinkedList[T comparable] interface {
 	Print() //completed
 }
 
-func newLinkedList[T comparable](value T) *LinkedListImpl[T] {
-	return &LinkedListImpl[T]{head: &Node[T]{Value: value}}
+type LinkedListImpl[T comparable] struct {
+	head   *Node[T]
+	length int
 }
 
-type LinkedListImpl[T comparable] struct {
-	head *Node[T]
+func newLinkedList[T comparable](value T) *LinkedListImpl[T] {
+	return &LinkedListImpl[T]{head: &Node[T]{Value: value}, length: 1}
+}
+
+func (N *LinkedListImpl[T]) Insert(idx int, value T) error {
+	if idx > N.length {
+		return errors.New("invalid index")
+	}
+	if idx < 0 {
+		return errors.New("cant insert in a negative value")
+	}
+	if idx == N.length {
+		N.Push(value)
+	}
+	if idx == 0 {
+		N.Shift(value)
+	}
+	current := N.head
+	for currentIdx := 0; currentIdx < idx; currentIdx++ {
+		if currentIdx == idx-1 {
+			newNode := &Node[T]{Value: value, Next: current.Next}
+			current.Next = newNode
+		}
+		current = current.Next
+	}
+	N.length++
+	return nil
+}
+
+func (N *LinkedListImpl[T]) Shift(value T) {
+	newNode := &Node[T]{Value: value, Next: N.head}
+	N.head = newNode
 }
 
 func (N *LinkedListImpl[T]) Print() {
@@ -61,7 +93,6 @@ func (N *LinkedListImpl[T]) dequeue() (T, error) {
 	value := current.Value
 	N.head = N.head.Next
 	return value, nil
-
 }
 
 func (N *LinkedListImpl[T]) Pop() (T, error) {
