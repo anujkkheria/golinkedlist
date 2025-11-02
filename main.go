@@ -13,8 +13,9 @@ type Node[T comparable] struct {
 type LinkedList[T comparable] interface {
 	Insert(idx int, value T)
 	Remove(value T)
-	Push(T) //completed
-	Pop() (value T, err error)
+	Push(T)                        //completed
+	Pop() (value T, err error)     // completed
+	dequeue() (value T, err error) // completed
 	Reverse()
 	Search(value T) (T, error)
 	Print() //completed
@@ -50,16 +51,39 @@ func (N *LinkedListImpl[T]) Push(value T) {
 	}
 }
 
+func (N *LinkedListImpl[T]) dequeue() (T, error) {
+	current := N.head
+	if current == nil {
+		var zero T
+		return zero, errors.New("the list is already empty")
+	}
+
+	value := current.Value
+	N.head = N.head.Next
+	return value, nil
+
+}
+
 func (N *LinkedListImpl[T]) Pop() (T, error) {
 	current := N.head
 	if current == nil {
 		var zero T
 		return zero, errors.New("the list is already empty")
 	}
-	value := current.Value
-	N.head = N.head.Next
+	var value T
+	var prev *Node[T]
+	for current != nil {
+		if current.Next == nil {
+			value = current.Value
+			if prev != nil {
+				prev.Next = nil
+			}
+			break
+		}
+		prev = current
+		current = current.Next
+	}
 	return value, nil
-
 }
 
 func main() {
